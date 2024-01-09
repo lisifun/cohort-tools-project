@@ -8,25 +8,38 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 function CohortListPage() {
   const [cohorts, setCohorts] = useState([]);
-  const [campusQuery, setCampusQuery] = useState("");
-  const [programQuery, setProgramQuery] = useState("");
+  // const [campusQuery, setCampusQuery] = useState("");
+  // const [programQuery, setProgramQuery] = useState("");
+  const [filteredCohorts, setFilteredCohorts] = useState([]);
 
-  const handleChange = (event, updateState) => {
-    updateState(event.target.value);
+  const handleChange = (event) => {
+    if (event.target.value.toLowerCase() === "all") {
+      setFilteredCohorts(cohorts);
+    } else {
+      setFilteredCohorts(
+        cohorts.filter((cohort) => {
+          return (
+            cohort.campus.toLowerCase() === event.target.value.toLowerCase() ||
+            cohort.program.toLowerCase() === event.target.value.toLowerCase()
+          );
+        })
+      );
+    }
   };
 
   useEffect(() => {
-    let queryString = "";
-    if (campusQuery) queryString += `campus=${campusQuery}&`;
-    if (programQuery) queryString += `program=${programQuery}`;
+    // let queryString = "";
+    // if (campusQuery) queryString += `campus=${campusQuery}&`;
+    // if (programQuery) queryString += `program=${programQuery}`;
 
     axios
-      .get(`${API_URL}/api/cohorts?${queryString}`)
+      .get(`${API_URL}/api/cohorts`)
       .then((response) => {
         setCohorts(response.data);
+        setFilteredCohorts(response.data);
       })
       .catch((error) => console.log(error));
-  }, [campusQuery, programQuery]);
+  }, []);
 
   const getAllCohorts = () => {
     axios
@@ -44,10 +57,10 @@ function CohortListPage() {
   return (
     <div className="CohortListPage">
       <CohortFilterBar
-        campusQuery={campusQuery}
-        setCampusQuery={setCampusQuery}
-        programQuery={programQuery}
-        setProgramQuery={setProgramQuery}
+        // campusQuery={campusQuery}
+        // setCampusQuery={setCampusQuery}
+        // programQuery={programQuery}
+        // setProgramQuery={setProgramQuery}
         handleChange={handleChange}
       />
 
@@ -59,8 +72,8 @@ function CohortListPage() {
         <span style={{ flexBasis: "25%" }}>Id</span>
       </div>
 
-      {cohorts &&
-        cohorts.map((cohort, index) => (
+      {filteredCohorts &&
+        filteredCohorts.map((cohort, index) => (
           <CohortCard
             key={cohort._id}
             cohort={cohort}
